@@ -86,14 +86,10 @@ class DoItList extends StatelessWidget {
     return ListView(
       children: [
         for (var item in appState.items)
-          Card(
-            elevation: 1.0,
-            child: ListTile(
-              title: Center(child: Text(item.name)),
-              titleTextStyle: Theme.of(context).textTheme.headlineLarge,
-              leading: Checkbox(value: false, onChanged: (value) => value),
-              trailing: Icon(Icons.delete),
-            ),
+          Item(
+            item: item,
+            onCheck: () => appState.toggleCheck(item),
+            onDelete: () => appState.removeItem(item),
           ),
       ],
     );
