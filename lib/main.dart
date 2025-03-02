@@ -24,10 +24,22 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var items = <Item>[];
+  var items = <ItemData>[];
 
-  void addItem(Item item) {
+  void addItem(ItemData item) {
     items.add(item);
+
+    notifyListeners();
+  }
+
+  void toggleCheck(ItemData item) {
+    item.toggleCheck();
+
+    notifyListeners();
+  }
+
+  void removeItem(ItemData item) {
+    items.remove(item);
 
     notifyListeners();
   }
@@ -128,7 +140,7 @@ class _AddItemFormState extends State<AddItemForm> {
           IconButton.filledTonal(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                appState.addItem(Item(name: textFieldController.text));
+                appState.addItem(ItemData(name: textFieldController.text));
                 textFieldController.text = '';
               }
             },
@@ -140,8 +152,8 @@ class _AddItemFormState extends State<AddItemForm> {
   }
 }
 
-class Item {
-  Item({required this.name, this.checked = false});
+class ItemData {
+  ItemData({required this.name, this.checked = false});
 
   final String name;
   bool checked;
@@ -150,5 +162,10 @@ class Item {
     checked = !checked;
 
     return checked;
+  }
+
+  @override
+  String toString() {
+    return 'Item(name: $name, checked: $checked)';
   }
 }
