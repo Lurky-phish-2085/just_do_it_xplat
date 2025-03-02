@@ -100,6 +100,51 @@ class DoItList extends StatelessWidget {
   }
 }
 
+class Item extends StatelessWidget {
+  const Item({
+    super.key,
+    required this.item,
+    required this.onCheck,
+    required this.onDelete,
+  });
+
+  final ItemData item;
+  final void Function() onCheck;
+  final void Function() onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: item.checked ? Theme.of(context).colorScheme.outlineVariant : null,
+      elevation: 1.0,
+      child: ListTile(
+        title: Center(
+          child: Text(
+            item.name,
+            style:
+                item.checked
+                    ? TextStyle(decoration: TextDecoration.lineThrough)
+                    : TextStyle(),
+          ),
+        ),
+        titleTextStyle: Theme.of(context).textTheme.headlineLarge,
+        leading: Checkbox(
+          value: item.checked,
+          onChanged: (value) {
+            onCheck();
+          },
+        ),
+        trailing: IconButton(
+          onPressed: () {
+            onDelete();
+          },
+          icon: Icon(Icons.delete),
+        ),
+      ),
+    );
+  }
+}
+
 class AddItemForm extends StatefulWidget {
   const AddItemForm({super.key});
 
