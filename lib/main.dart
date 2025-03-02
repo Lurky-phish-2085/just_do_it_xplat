@@ -181,7 +181,7 @@ class _AddItemFormState extends State<AddItemForm> {
           IconButton.filledTonal(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                appState.addItem(ItemData(name: textFieldController.text));
+                appState.addItem(ItemData(textFieldController.text));
                 textFieldController.text = '';
               }
             },
@@ -194,7 +194,7 @@ class _AddItemFormState extends State<AddItemForm> {
 }
 
 class ItemData {
-  ItemData({required this.name, this.checked = false});
+  ItemData(this.name, {this.checked = false});
 
   final String name;
   bool checked;
