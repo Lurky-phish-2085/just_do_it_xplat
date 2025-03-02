@@ -24,9 +24,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var items = <String>[];
+  var items = <Item>[];
 
-  void addItem(String item) {
+  void addItem(Item item) {
     items.add(item);
 
     notifyListeners();
@@ -56,13 +56,34 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 20.0,
-            children: <Widget>[
-              Expanded(child: const Placeholder()),
-              AddItemForm(),
-            ],
+            children: <Widget>[Expanded(child: DoItList()), AddItemForm()],
           ),
         ),
       ),
+    );
+  }
+}
+
+class DoItList extends StatelessWidget {
+  const DoItList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return ListView(
+      children: [
+        for (var item in appState.items)
+          Card(
+            elevation: 1.0,
+            child: ListTile(
+              title: Center(child: Text(item.name)),
+              titleTextStyle: Theme.of(context).textTheme.headlineLarge,
+              leading: Checkbox(value: false, onChanged: (value) => value),
+              trailing: Icon(Icons.delete),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -107,7 +128,7 @@ class _AddItemFormState extends State<AddItemForm> {
           IconButton.filledTonal(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                appState.addItem(textFieldController.text);
+                appState.addItem(Item(name: textFieldController.text));
                 textFieldController.text = '';
               }
             },
@@ -116,5 +137,18 @@ class _AddItemFormState extends State<AddItemForm> {
         ],
       ),
     );
+  }
+}
+
+class Item {
+  Item({required this.name, this.checked = false});
+
+  final String name;
+  bool checked;
+
+  bool toggleCheck() {
+    checked = !checked;
+
+    return checked;
   }
 }
