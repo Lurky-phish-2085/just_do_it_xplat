@@ -100,8 +100,8 @@ class DoItList extends StatelessWidget {
   });
 
   final Iterable<ItemData> items;
-  final void Function(ItemData) onCheck;
-  final void Function(ItemData) onDelete;
+  final void Function(ItemData)? onCheck;
+  final void Function(ItemData)? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +110,8 @@ class DoItList extends StatelessWidget {
         for (var item in items)
           Item(
             item: item,
-            onCheck: () => onCheck(item),
-            onDelete: () => onDelete(item),
+            onCheck: () => onCheck?.call(item),
+            onDelete: () => onDelete?.call(item),
           ),
       ],
     );
@@ -127,8 +127,8 @@ class Item extends StatelessWidget {
   });
 
   final ItemData item;
-  final void Function() onCheck;
-  final void Function() onDelete;
+  final void Function()? onCheck;
+  final void Function()? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -149,12 +149,12 @@ class Item extends StatelessWidget {
         leading: Checkbox(
           value: item.checked,
           onChanged: (value) {
-            onCheck();
+            onCheck?.call();
           },
         ),
         trailing: IconButton(
           onPressed: () {
-            onDelete();
+            onDelete?.call();
           },
           icon: Icon(Icons.delete),
         ),
@@ -166,7 +166,7 @@ class Item extends StatelessWidget {
 class AddItemForm extends StatefulWidget {
   const AddItemForm({super.key, required this.onSubmit});
 
-  final void Function(ItemData item) onSubmit;
+  final void Function(ItemData item)? onSubmit;
 
   @override
   State<AddItemForm> createState() => _AddItemFormState();
@@ -203,7 +203,7 @@ class _AddItemFormState extends State<AddItemForm> {
           IconButton.filledTonal(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                widget.onSubmit(ItemData(textFieldController.text));
+                widget.onSubmit?.call(ItemData(textFieldController.text));
                 textFieldController.text = '';
               }
             },
