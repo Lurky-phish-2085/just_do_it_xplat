@@ -57,6 +57,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<MyAppState>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -68,7 +70,20 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 20.0,
-            children: <Widget>[Expanded(child: DoItList()), AddItemForm()],
+            children: <Widget>[
+              Expanded(
+                child: DoItList(
+                  items: appState.items,
+                  onCheck: (item) => appState.toggleCheck(item),
+                  onDelete: (item) => appState.removeItem(item),
+                ),
+              ),
+              AddItemForm(
+                onSubmit: (item) {
+                  appState.addItem(item);
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -77,19 +92,26 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class DoItList extends StatelessWidget {
-  const DoItList({super.key});
+  const DoItList({
+    super.key,
+    required this.items,
+    required this.onCheck,
+    required this.onDelete,
+  });
+
+  final Iterable<ItemData> items;
+  final void Function(ItemData) onCheck;
+  final void Function(ItemData) onDelete;
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
     return ListView(
       children: [
-        for (var item in appState.items)
+        for (var item in items)
           Item(
             item: item,
-            onCheck: () => appState.toggleCheck(item),
-            onDelete: () => appState.removeItem(item),
+            onCheck: () => onCheck(item),
+            onDelete: () => onDelete(item),
           ),
       ],
     );
@@ -120,7 +142,7 @@ class Item extends StatelessWidget {
             style:
                 item.checked
                     ? TextStyle(decoration: TextDecoration.lineThrough)
-                    : TextStyle(),
+                    : null,
           ),
         ),
         titleTextStyle: Theme.of(context).textTheme.headlineLarge,
@@ -142,7 +164,9 @@ class Item extends StatelessWidget {
 }
 
 class AddItemForm extends StatefulWidget {
-  const AddItemForm({super.key});
+  const AddItemForm({super.key, required this.onSubmit});
+
+  final void Function(ItemData item) onSubmit;
 
   @override
   State<AddItemForm> createState() => _AddItemFormState();
@@ -155,8 +179,6 @@ class _AddItemFormState extends State<AddItemForm> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
     return Form(
       key: _formKey,
       child: Row(
@@ -181,7 +203,7 @@ class _AddItemFormState extends State<AddItemForm> {
           IconButton.filledTonal(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                appState.addItem(ItemData(textFieldController.text));
+                widget.onSubmit(ItemData(textFieldController.text));
                 textFieldController.text = '';
               }
             },
