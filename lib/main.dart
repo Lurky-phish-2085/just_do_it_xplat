@@ -84,9 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
         child: Column(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
@@ -102,20 +102,66 @@ class _MyHomePageState extends State<MyHomePage> {
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 20.0,
           children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+              Expanded(child: const Placeholder()),
+              AddItemForm(),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class AddItemForm extends StatefulWidget {
+  const AddItemForm({super.key});
+
+  @override
+  State<AddItemForm> createState() => _AddItemFormState();
+}
+
+class _AddItemFormState extends State<AddItemForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  final textFieldController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Form(
+      key: _formKey,
+      child: Row(
+        spacing: 20.0,
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: textFieldController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                }
+
+                return null;
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter your to-do list item',
+              ),
+            ),
+          ),
+          IconButton.filledTonal(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                appState.addItem(textFieldController.text);
+                textFieldController.text = '';
+              }
+            },
+            icon: Icon(Icons.add),
+          ),
+        ],
+      ),
     );
   }
 }
