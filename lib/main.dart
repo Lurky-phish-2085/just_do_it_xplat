@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+enum AddItemFormVariants { compact, expanded }
+
 void main() {
   runApp(const MyApp());
 }
@@ -15,12 +17,14 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Just Do It',
         darkTheme: ThemeData(
+          useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.amber,
             brightness: Brightness.dark,
           ),
         ),
         theme: ThemeData(
+          useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         ),
         home: const MyHomePage(title: 'Just Do It'),
@@ -170,8 +174,13 @@ class Item extends StatelessWidget {
 }
 
 class AddItemForm extends StatefulWidget {
-  const AddItemForm({super.key, required this.onSubmit});
+  const AddItemForm({
+    super.key,
+    this.variant = AddItemFormVariants.compact,
+    required this.onSubmit,
+  });
 
+  final AddItemFormVariants variant;
   final void Function(ItemData item)? onSubmit;
 
   @override
@@ -185,6 +194,7 @@ class _AddItemFormState extends State<AddItemForm> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.variant == AddItemFormVariants.compact) {
     return Form(
       key: _formKey,
       child: Row(
@@ -218,6 +228,46 @@ class _AddItemFormState extends State<AddItemForm> {
         ],
       ),
     );
+    } else {
+      return Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 20.0,
+          children: [
+            TextFormField(
+              controller: textFieldController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                }
+
+                return null;
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter your to-do list item',
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onSubmit?.call(ItemData(textFieldController.text));
+                  textFieldController.text = '';
+                }
+              },
+              icon: Icon(Icons.add),
+              label: Text("Add"),
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(150, 70),
+                iconSize: 40.0,
+                textStyle: TextTheme.of(context).headlineSmall,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 
