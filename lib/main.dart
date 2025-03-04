@@ -115,6 +115,10 @@ class DoItList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return EmptyListIndicator();
+    }
+
     return ListView(
       children: [
         for (var item in items)
@@ -124,6 +128,28 @@ class DoItList extends StatelessWidget {
             onDelete: () => onDelete?.call(item),
           ),
       ],
+    );
+  }
+}
+
+class EmptyListIndicator extends StatelessWidget {
+  const EmptyListIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.wysiwyg, size: 100.0),
+          SizedBox(height: 20.0),
+          Text(
+            "To-Do List Empty...\nPlease add one!",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ],
+      ),
     );
   }
 }
