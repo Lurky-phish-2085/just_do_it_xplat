@@ -74,28 +74,65 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 20.0,
-            children: <Widget>[
-              Expanded(
-                child: DoItList(
-                  items: appState.items,
-                  onCheck: (item) => appState.toggleCheck(item),
-                  onDelete: (item) => appState.removeItem(item),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth <= 840) {
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 20.0,
+                  children: <Widget>[
+                    Expanded(
+                      child: DoItList(
+                        items: appState.items,
+                        onCheck: (item) => appState.toggleCheck(item),
+                        onDelete: (item) => appState.removeItem(item),
+                      ),
+                    ),
+                    AddItemForm(
+                      onSubmit: (item) {
+                        appState.addItem(item);
+                      },
+                    ),
+                  ],
                 ),
               ),
-              AddItemForm(
-                onSubmit: (item) {
-                  appState.addItem(item);
-                },
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
+                spacing: 40.0,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 20.0,
+                      children: [
+                        AddItemForm(
+                          onSubmit: (item) => appState.addItem(item),
+                          variant: AddItemFormVariants.expanded,
+                        ),
+                        Placeholder(),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: DoItList(
+                      items: appState.items,
+                      onCheck: (item) => appState.toggleCheck(item),
+                      onDelete: (item) => appState.removeItem(item),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
     );
   }
@@ -221,39 +258,39 @@ class _AddItemFormState extends State<AddItemForm> {
   @override
   Widget build(BuildContext context) {
     if (widget.variant == AddItemFormVariants.compact) {
-    return Form(
-      key: _formKey,
-      child: Row(
-        spacing: 20.0,
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: textFieldController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
+      return Form(
+        key: _formKey,
+        child: Row(
+          spacing: 20.0,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: textFieldController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some text';
+                  }
 
-                return null;
-              },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter your to-do list item',
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter your to-do list item',
+                ),
               ),
             ),
-          ),
-          IconButton.filledTonal(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                widget.onSubmit?.call(ItemData(textFieldController.text));
-                textFieldController.text = '';
-              }
-            },
-            icon: Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
+            IconButton.filledTonal(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onSubmit?.call(ItemData(textFieldController.text));
+                  textFieldController.text = '';
+                }
+              },
+              icon: Icon(Icons.add),
+            ),
+          ],
+        ),
+      );
     } else {
       return Form(
         key: _formKey,
