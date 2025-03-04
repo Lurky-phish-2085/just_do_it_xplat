@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+enum AddItemFormVariants { compact, expanded }
+
 void main() {
   runApp(const MyApp());
 }
@@ -15,12 +17,14 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Just Do It',
         darkTheme: ThemeData(
+          useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.amber,
             brightness: Brightness.dark,
           ),
         ),
         theme: ThemeData(
+          useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         ),
         home: const MyHomePage(title: 'Just Do It'),
@@ -70,28 +74,65 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 20.0,
-            children: <Widget>[
-              Expanded(
-                child: DoItList(
-                  items: appState.items,
-                  onCheck: (item) => appState.toggleCheck(item),
-                  onDelete: (item) => appState.removeItem(item),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth <= 840) {
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 20.0,
+                  children: <Widget>[
+                    Expanded(
+                      child: DoItList(
+                        items: appState.items,
+                        onCheck: (item) => appState.toggleCheck(item),
+                        onDelete: (item) => appState.removeItem(item),
+                      ),
+                    ),
+                    AddItemForm(
+                      onSubmit: (item) {
+                        appState.addItem(item);
+                      },
+                    ),
+                  ],
                 ),
               ),
-              AddItemForm(
-                onSubmit: (item) {
-                  appState.addItem(item);
-                },
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
+                spacing: 40.0,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 20.0,
+                      children: [
+                        AddItemForm(
+                          onSubmit: (item) => appState.addItem(item),
+                          variant: AddItemFormVariants.expanded,
+                        ),
+                        Placeholder(),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: DoItList(
+                      items: appState.items,
+                      onCheck: (item) => appState.toggleCheck(item),
+                      onDelete: (item) => appState.removeItem(item),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
     );
   }
@@ -111,6 +152,10 @@ class DoItList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return EmptyListIndicator();
+    }
+
     return ListView(
       children: [
         for (var item in items)
@@ -120,6 +165,28 @@ class DoItList extends StatelessWidget {
             onDelete: () => onDelete?.call(item),
           ),
       ],
+    );
+  }
+}
+
+class EmptyListIndicator extends StatelessWidget {
+  const EmptyListIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.wysiwyg, size: 100.0),
+          SizedBox(height: 20.0),
+          Text(
+            "To-Do List Empty...\nPlease add one!",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -170,8 +237,13 @@ class Item extends StatelessWidget {
 }
 
 class AddItemForm extends StatefulWidget {
-  const AddItemForm({super.key, required this.onSubmit});
+  const AddItemForm({
+    super.key,
+    this.variant = AddItemFormVariants.compact,
+    required this.onSubmit,
+  });
 
+  final AddItemFormVariants variant;
   final void Function(ItemData item)? onSubmit;
 
   @override
@@ -185,13 +257,48 @@ class _AddItemFormState extends State<AddItemForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Row(
-        spacing: 20.0,
-        children: [
-          Expanded(
-            child: TextFormField(
+    if (widget.variant == AddItemFormVariants.compact) {
+      return Form(
+        key: _formKey,
+        child: Row(
+          spacing: 20.0,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: textFieldController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some text';
+                  }
+
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter your to-do list item',
+                ),
+              ),
+            ),
+            IconButton.filledTonal(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onSubmit?.call(ItemData(textFieldController.text));
+                  textFieldController.text = '';
+                }
+              },
+              icon: Icon(Icons.add),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 20.0,
+          children: [
+            TextFormField(
               controller: textFieldController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -205,19 +312,25 @@ class _AddItemFormState extends State<AddItemForm> {
                 hintText: 'Enter your to-do list item',
               ),
             ),
-          ),
-          IconButton.filledTonal(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                widget.onSubmit?.call(ItemData(textFieldController.text));
-                textFieldController.text = '';
-              }
-            },
-            icon: Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
+            ElevatedButton.icon(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onSubmit?.call(ItemData(textFieldController.text));
+                  textFieldController.text = '';
+                }
+              },
+              icon: Icon(Icons.add),
+              label: Text("Add"),
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(150, 70),
+                iconSize: 40.0,
+                textStyle: TextTheme.of(context).headlineSmall,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 
