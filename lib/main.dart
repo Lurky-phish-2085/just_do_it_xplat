@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 enum AddItemFormVariants { compact, expanded }
+
+enum GreetingsVariants { welcome, motivational }
 
 void main() {
   runApp(const MyApp());
@@ -82,8 +86,15 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 20.0,
                   children: <Widget>[
+                    Greetings(
+                      variant:
+                          appState.items.isNotEmpty
+                              ? GreetingsVariants.motivational
+                              : GreetingsVariants.welcome,
+                    ),
                     StatsCard(items: appState.items),
                     Expanded(
                       child: DoItList(
@@ -114,6 +125,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 20.0,
                       children: [
+                        Greetings(
+                          variant:
+                              appState.items.isNotEmpty
+                                  ? GreetingsVariants.motivational
+                                  : GreetingsVariants.welcome,
+                        ),
                         AddItemForm(
                           onSubmit: (item) => appState.addItem(item),
                           variant: AddItemFormVariants.expanded,
@@ -138,6 +155,53 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
+  }
+}
+
+class Greetings extends StatefulWidget {
+  const Greetings({super.key, this.variant = GreetingsVariants.welcome});
+
+  final GreetingsVariants variant;
+
+  @override
+  State<Greetings> createState() => _GreetingsState();
+}
+
+class _GreetingsState extends State<Greetings> {
+  var _greeting = "";
+
+  final _welcomeQuotes = const [
+    "Welcome, back!",
+    "What you will do?",
+    "Looking good! B-)",
+  ];
+
+  final _motivationalQuotes = const [
+    "Never Give UP!",
+    "Deal with it!",
+    "Just Do IT™",
+  ];
+
+  void initGreeting() {
+    final random = Random();
+
+    setState(() {
+      _greeting =
+          widget.variant == GreetingsVariants.welcome
+              ? _welcomeQuotes[random.nextInt(_welcomeQuotes.length)]
+              : _motivationalQuotes[random.nextInt(_motivationalQuotes.length)];
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initGreeting();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(_greeting, style: Theme.of(context).textTheme.displayMedium);
   }
 }
 
@@ -170,7 +234,26 @@ class StatsCard extends StatelessWidget {
                 ),
               ],
             ),
-            ElevatedButton(onPressed: null, child: Text("Import / Export")),
+            ElevatedButton(
+              onPressed:
+                  items.isNotEmpty
+                      ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            showCloseIcon: true,
+                            content: Text(
+                              "Import Export Feature is not available yet.",
+                            ),
+                          ),
+                        );
+                      }
+                      : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              child: const Text("Import / Export"),
+            ),
           ],
         ),
       ),
