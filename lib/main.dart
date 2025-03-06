@@ -84,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 20.0,
                   children: <Widget>[
+                    StatsCard(items: appState.items),
                     Expanded(
                       child: DoItList(
                         items: appState.items,
@@ -110,13 +111,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     flex: 1,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 20.0,
                       children: [
                         AddItemForm(
                           onSubmit: (item) => appState.addItem(item),
                           variant: AddItemFormVariants.expanded,
                         ),
-                        Placeholder(),
+                        SizedBox(height: 128.0),
+                        StatsCard(items: appState.items),
                       ],
                     ),
                   ),
@@ -133,6 +136,43 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           }
         },
+      ),
+    );
+  }
+}
+
+class StatsCard extends StatelessWidget {
+  const StatsCard({super.key, required this.items});
+
+  final Iterable<ItemData> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final numOfDoneItems = items.where((item) => item.checked).toList().length;
+    final numOfRemainingItems = items.length - numOfDoneItems;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Tasks Left: $numOfRemainingItems",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                Text(
+                  "Done: $numOfDoneItems",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ],
+            ),
+            ElevatedButton(onPressed: null, child: Text("Import / Export")),
+          ],
+        ),
       ),
     );
   }
