@@ -18,30 +18,52 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Just Do It',
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.amber,
-            brightness: Brightness.dark,
-          ),
-        ),
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
-        ),
-        home: const MyHomePage(title: 'Just Do It'),
+      child: Consumer<MyAppState>(
+        builder: (context, state, child) {
+          return MaterialApp(
+            title: 'Just Do It',
+            themeMode: state.themeMode,
+            darkTheme: state.darkTheme,
+            theme: state.lightTheme,
+            home: const MyHomePage(title: 'Just Do It'),
+          );
+        },
       ),
     );
   }
 }
 
 class MyAppState extends ChangeNotifier {
-  var items = <ItemData>[];
+  final _items = <ItemData>[];
+  var _themeMode = ThemeMode.system;
+
+  Iterable<ItemData> get items => _items;
+
+  ThemeMode get themeMode => _themeMode;
+  set themeMode(ThemeMode value) {
+    _themeMode = value;
+
+    notifyListeners();
+  }
+
+  get darkTheme => ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.amber,
+      brightness: Brightness.dark,
+    ),
+  );
+
+  get lightTheme => ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.amber,
+      brightness: Brightness.light,
+    ),
+  );
 
   void addItem(ItemData item) {
-    items.add(item);
+    _items.add(item);
 
     notifyListeners();
   }
@@ -53,7 +75,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   void removeItem(ItemData item) {
-    items.remove(item);
+    _items.remove(item);
 
     notifyListeners();
   }
@@ -77,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: <Widget>[ChangeThemeButton()],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -154,6 +177,84 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
+    );
+  }
+}
+
+class ChangeThemeButton extends StatelessWidget {
+  const ChangeThemeButton({super.key});
+
+  IconData getThemeIcon(ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.dark:
+        return Icons.dark_mode;
+      case ThemeMode.light:
+        return Icons.light_mode;
+      default:
+        return Icons.palette;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<MyAppState>();
+    final themeIcon = getThemeIcon(appState.themeMode);
+
+    return IconButton(
+      onPressed:
+          () => showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder:
+                (BuildContext context) => AlertDialog(
+                  title: const Text("Change Theme"),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: <Widget>[
+                        ListTile(
+                          title: const Text("Dark"),
+                          leading: Radio(
+                            value: ThemeMode.dark,
+                            groupValue: appState.themeMode,
+                            onChanged: (ThemeMode? value) {
+                              appState.themeMode = value!;
+                            },
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Light"),
+                          leading: Radio(
+                            value: ThemeMode.light,
+                            groupValue: appState.themeMode,
+                            onChanged: (ThemeMode? value) {
+                              appState.themeMode = value!;
+                            },
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Auto"),
+                          leading: Radio(
+                            value: ThemeMode.system,
+                            groupValue: appState.themeMode,
+                            onChanged: (ThemeMode? value) {
+                              appState.themeMode = value!;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Confirm"),
+                    ),
+                  ],
+                ),
+          ),
+      icon: Icon(themeIcon),
     );
   }
 }
