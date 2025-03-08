@@ -18,30 +18,52 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Just Do It',
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.amber,
-            brightness: Brightness.dark,
-          ),
-        ),
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
-        ),
-        home: const MyHomePage(title: 'Just Do It'),
+      child: Consumer<MyAppState>(
+        builder: (context, state, child) {
+          return MaterialApp(
+            title: 'Just Do It',
+            themeMode: state.themeMode,
+            darkTheme: state.darkTheme,
+            theme: state.lightTheme,
+            home: const MyHomePage(title: 'Just Do It'),
+          );
+        },
       ),
     );
   }
 }
 
 class MyAppState extends ChangeNotifier {
-  var items = <ItemData>[];
+  final _items = <ItemData>[];
+  var _themeMode = ThemeMode.system;
+
+  Iterable<ItemData> get items => _items;
+
+  ThemeMode get themeMode => _themeMode;
+  set themeMode(ThemeMode value) {
+    _themeMode = value;
+
+    notifyListeners();
+  }
+
+  get darkTheme => ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.amber,
+      brightness: Brightness.dark,
+    ),
+  );
+
+  get lightTheme => ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.amber,
+      brightness: Brightness.light,
+    ),
+  );
 
   void addItem(ItemData item) {
-    items.add(item);
+    _items.add(item);
 
     notifyListeners();
   }
@@ -53,7 +75,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   void removeItem(ItemData item) {
-    items.remove(item);
+    _items.remove(item);
 
     notifyListeners();
   }
