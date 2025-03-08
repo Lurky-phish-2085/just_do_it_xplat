@@ -99,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: <Widget>[ChangeThemeButton()],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -176,6 +177,84 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
+    );
+  }
+}
+
+class ChangeThemeButton extends StatelessWidget {
+  const ChangeThemeButton({super.key});
+
+  IconData getThemeIcon(ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.dark:
+        return Icons.dark_mode;
+      case ThemeMode.light:
+        return Icons.light_mode;
+      default:
+        return Icons.palette;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<MyAppState>();
+    final themeIcon = getThemeIcon(appState.themeMode);
+
+    return IconButton(
+      onPressed:
+          () => showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder:
+                (BuildContext context) => AlertDialog(
+                  title: const Text("Change Theme"),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: <Widget>[
+                        ListTile(
+                          title: const Text("Dark"),
+                          leading: Radio(
+                            value: ThemeMode.dark,
+                            groupValue: appState.themeMode,
+                            onChanged: (ThemeMode? value) {
+                              appState.themeMode = value!;
+                            },
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Light"),
+                          leading: Radio(
+                            value: ThemeMode.light,
+                            groupValue: appState.themeMode,
+                            onChanged: (ThemeMode? value) {
+                              appState.themeMode = value!;
+                            },
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Auto"),
+                          leading: Radio(
+                            value: ThemeMode.system,
+                            groupValue: appState.themeMode,
+                            onChanged: (ThemeMode? value) {
+                              appState.themeMode = value!;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Confirm"),
+                    ),
+                  ],
+                ),
+          ),
+      icon: Icon(themeIcon),
     );
   }
 }
