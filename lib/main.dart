@@ -213,6 +213,9 @@ class ChangeThemeButton extends StatelessWidget {
                       children: <Widget>[
                         ListTile(
                           title: const Text("Dark"),
+                          onTap: () {
+                            appState.themeMode = ThemeMode.dark;
+                          },
                           leading: Radio(
                             value: ThemeMode.dark,
                             groupValue: appState.themeMode,
@@ -223,6 +226,9 @@ class ChangeThemeButton extends StatelessWidget {
                         ),
                         ListTile(
                           title: const Text("Light"),
+                          onTap: () {
+                            appState.themeMode = ThemeMode.light;
+                          },
                           leading: Radio(
                             value: ThemeMode.light,
                             groupValue: appState.themeMode,
@@ -233,6 +239,9 @@ class ChangeThemeButton extends StatelessWidget {
                         ),
                         ListTile(
                           title: const Text("Auto"),
+                          onTap: () {
+                            appState.themeMode = ThemeMode.system;
+                          },
                           leading: Radio(
                             value: ThemeMode.system,
                             groupValue: appState.themeMode,
