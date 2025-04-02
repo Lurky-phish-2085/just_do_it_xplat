@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:just_do_it_xplat/database/database.dart';
 import 'package:just_do_it_xplat/models/todo_model.dart';
 import 'package:just_do_it_xplat/viewmodels/theme_viewmodel.dart';
 import 'package:just_do_it_xplat/viewmodels/todo_list_viewmodel.dart';
@@ -31,71 +32,89 @@ class HomeScreen extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 20.0,
-                  children: <Widget>[
-                    Greetings(
-                      variant:
-                          appState.items.isNotEmpty
-                              ? GreetingsVariants.motivational
-                              : GreetingsVariants.welcome,
-                    ),
-                    StatsCard(items: appState.items),
-                    Expanded(
-                      child: DoItList(
-                        items: appState.items,
-                        onCheck: (item) => appState.toggleCheck(item),
-                        onDelete: (item) => appState.removeItem(item),
-                      ),
-                    ),
-                    AddItemForm(
-                      onSubmit: (item) {
-                        appState.addItem(item);
-                      },
-                    ),
-                  ],
+                child: StreamBuilder<Iterable<TodoItemModelData>>(
+                  stream: appState.todos,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    final items = snapshot.data ?? [];
+
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 20.0,
+                      children: <Widget>[
+                        Greetings(
+                          variant:
+                              items.isNotEmpty
+                                  ? GreetingsVariants.motivational
+                                  : GreetingsVariants.welcome,
+                        ),
+                        StatsCard(items: items),
+                        Expanded(
+                          child: DoItList(
+                            items: items,
+                            onCheck: (item) => appState.toggleCheck(item),
+                            onDelete: (item) => appState.removeItem(item),
+                          ),
+                        ),
+                        AddItemForm(
+                          onSubmit: (item) {
+                            appState.addItem(item);
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             );
           } else {
             return Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Row(
-                spacing: 40.0,
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 20.0,
-                      children: [
-                        Greetings(
-                          variant:
-                              appState.items.isNotEmpty
-                                  ? GreetingsVariants.motivational
-                                  : GreetingsVariants.welcome,
+              child: StreamBuilder<Iterable<TodoItemModelData>>(
+                stream: appState.todos,
+                builder: (context, snapshot) {
+                  final items = snapshot.data ?? [];
+
+                  return Row(
+                    spacing: 40.0,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 20.0,
+                          children: [
+                            Greetings(
+                              variant:
+                                  items.isNotEmpty
+                                      ? GreetingsVariants.motivational
+                                      : GreetingsVariants.welcome,
+                            ),
+                            AddItemForm(
+                              onSubmit: (item) => appState.addItem(item),
+                              variant: AddItemFormVariants.expanded,
+                            ),
+                            SizedBox(height: 128.0),
+                            StatsCard(items: items),
+                          ],
                         ),
-                        AddItemForm(
-                          onSubmit: (item) => appState.addItem(item),
-                          variant: AddItemFormVariants.expanded,
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: DoItList(
+                          items: items,
+                          onCheck: (item) => appState.toggleCheck(item),
+                          onDelete: (item) => appState.removeItem(item),
                         ),
-                        SizedBox(height: 128.0),
-                        StatsCard(items: appState.items),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: DoItList(
-                      items: appState.items,
-                      onCheck: (item) => appState.toggleCheck(item),
-                      onDelete: (item) => appState.removeItem(item),
-                    ),
-                  ),
-                ],
+                      ),
+                    ],
+                  );
+                },
               ),
             );
           }
@@ -242,11 +261,11 @@ class _GreetingsState extends State<Greetings> {
 class StatsCard extends StatelessWidget {
   const StatsCard({super.key, required this.items});
 
-  final Iterable<TodoData> items;
+  final Iterable<TodoItemModelData> items;
 
   @override
   Widget build(BuildContext context) {
-    final numOfDoneItems = items.where((item) => item.checked).toList().length;
+    final numOfDoneItems = items.where((item) => item.done).toList().length;
     final numOfRemainingItems = items.length - numOfDoneItems;
 
     return Card(
@@ -303,9 +322,9 @@ class DoItList extends StatelessWidget {
     required this.onDelete,
   });
 
-  final Iterable<TodoData> items;
-  final void Function(TodoData)? onCheck;
-  final void Function(TodoData)? onDelete;
+  final Iterable<TodoItemModelData> items;
+  final void Function(TodoItemModelData)? onCheck;
+  final void Function(TodoItemModelData)? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -356,28 +375,28 @@ class Item extends StatelessWidget {
     required this.onDelete,
   });
 
-  final TodoData item;
+  final TodoItemModelData item;
   final void Function()? onCheck;
   final void Function()? onDelete;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: item.checked ? Theme.of(context).colorScheme.outlineVariant : null,
+      color: item.done ? Theme.of(context).colorScheme.outlineVariant : null,
       elevation: 1.0,
       child: ListTile(
         title: Center(
           child: Text(
-            item.task,
+            item.title,
             style:
-                item.checked
+                item.done
                     ? TextStyle(decoration: TextDecoration.lineThrough)
                     : null,
           ),
         ),
         titleTextStyle: Theme.of(context).textTheme.headlineLarge,
         leading: Checkbox(
-          value: item.checked,
+          value: item.done,
           onChanged: (value) {
             onCheck?.call();
           },
