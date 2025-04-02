@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:just_do_it_xplat/database/database.dart';
 import 'package:just_do_it_xplat/models/todo_model.dart';
+import 'package:just_do_it_xplat/repositories/todo_repository.dart';
 import 'package:just_do_it_xplat/viewmodels/theme_viewmodel.dart';
 import 'package:just_do_it_xplat/viewmodels/todo_list_viewmodel.dart';
 import 'package:just_do_it_xplat/views/home_screen.dart';
@@ -17,8 +19,16 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider(create: (_) => TodoModel()),
+        Provider(
+          create: (_) => AppDatabase(),
+          dispose: (context, db) => db.close(),
+        ),
+        Provider(
+          create: (context) => TodoRepository(context.read<AppDatabase>()),
+        ),
         ChangeNotifierProvider(
-          create: (context) => TodoListViewModel(model: context.read()),
+          create:
+              (context) => TodoListViewModel(context.read<TodoRepository>()),
         ),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
