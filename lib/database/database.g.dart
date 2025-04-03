@@ -3,12 +3,11 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $TodoItemModelTable extends TodoItemModel
-    with TableInfo<$TodoItemModelTable, TodoItemModelData> {
+class $TodoModelTable extends TodoModel with TableInfo<$TodoModelTable, Todo> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TodoItemModelTable(this.attachedDatabase, [this._alias]);
+  $TodoModelTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -29,7 +28,7 @@ class $TodoItemModelTable extends TodoItemModel
     aliasedName,
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 6,
+      minTextLength: 1,
       maxTextLength: 32,
     ),
     type: DriftSqlType.string,
@@ -65,10 +64,10 @@ class $TodoItemModelTable extends TodoItemModel
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'todo_item_model';
+  static const String $name = 'todo_model';
   @override
   VerificationContext validateIntegrity(
-    Insertable<TodoItemModelData> instance, {
+    Insertable<Todo> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -102,9 +101,9 @@ class $TodoItemModelTable extends TodoItemModel
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  TodoItemModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Todo map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TodoItemModelData(
+    return Todo(
       id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -128,18 +127,17 @@ class $TodoItemModelTable extends TodoItemModel
   }
 
   @override
-  $TodoItemModelTable createAlias(String alias) {
-    return $TodoItemModelTable(attachedDatabase, alias);
+  $TodoModelTable createAlias(String alias) {
+    return $TodoModelTable(attachedDatabase, alias);
   }
 }
 
-class TodoItemModelData extends DataClass
-    implements Insertable<TodoItemModelData> {
+class Todo extends DataClass implements Insertable<Todo> {
   final int id;
   final String title;
   final bool done;
   final DateTime? createdAt;
-  const TodoItemModelData({
+  const Todo({
     required this.id,
     required this.title,
     required this.done,
@@ -157,8 +155,8 @@ class TodoItemModelData extends DataClass
     return map;
   }
 
-  TodoItemModelCompanion toCompanion(bool nullToAbsent) {
-    return TodoItemModelCompanion(
+  TodoModelCompanion toCompanion(bool nullToAbsent) {
+    return TodoModelCompanion(
       id: Value(id),
       title: Value(title),
       done: Value(done),
@@ -169,12 +167,12 @@ class TodoItemModelData extends DataClass
     );
   }
 
-  factory TodoItemModelData.fromJson(
+  factory Todo.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TodoItemModelData(
+    return Todo(
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       done: serializer.fromJson<bool>(json['done']),
@@ -192,19 +190,19 @@ class TodoItemModelData extends DataClass
     };
   }
 
-  TodoItemModelData copyWith({
+  Todo copyWith({
     int? id,
     String? title,
     bool? done,
     Value<DateTime?> createdAt = const Value.absent(),
-  }) => TodoItemModelData(
+  }) => Todo(
     id: id ?? this.id,
     title: title ?? this.title,
     done: done ?? this.done,
     createdAt: createdAt.present ? createdAt.value : this.createdAt,
   );
-  TodoItemModelData copyWithCompanion(TodoItemModelCompanion data) {
-    return TodoItemModelData(
+  Todo copyWithCompanion(TodoModelCompanion data) {
+    return Todo(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       done: data.done.present ? data.done.value : this.done,
@@ -214,7 +212,7 @@ class TodoItemModelData extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('TodoItemModelData(')
+    return (StringBuffer('Todo(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('done: $done, ')
@@ -228,31 +226,31 @@ class TodoItemModelData extends DataClass
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is TodoItemModelData &&
+      (other is Todo &&
           other.id == this.id &&
           other.title == this.title &&
           other.done == this.done &&
           other.createdAt == this.createdAt);
 }
 
-class TodoItemModelCompanion extends UpdateCompanion<TodoItemModelData> {
+class TodoModelCompanion extends UpdateCompanion<Todo> {
   final Value<int> id;
   final Value<String> title;
   final Value<bool> done;
   final Value<DateTime?> createdAt;
-  const TodoItemModelCompanion({
+  const TodoModelCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.done = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
-  TodoItemModelCompanion.insert({
+  TodoModelCompanion.insert({
     this.id = const Value.absent(),
     required String title,
     this.done = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : title = Value(title);
-  static Insertable<TodoItemModelData> custom({
+  static Insertable<Todo> custom({
     Expression<int>? id,
     Expression<String>? title,
     Expression<bool>? done,
@@ -266,13 +264,13 @@ class TodoItemModelCompanion extends UpdateCompanion<TodoItemModelData> {
     });
   }
 
-  TodoItemModelCompanion copyWith({
+  TodoModelCompanion copyWith({
     Value<int>? id,
     Value<String>? title,
     Value<bool>? done,
     Value<DateTime?>? createdAt,
   }) {
-    return TodoItemModelCompanion(
+    return TodoModelCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       done: done ?? this.done,
@@ -300,7 +298,7 @@ class TodoItemModelCompanion extends UpdateCompanion<TodoItemModelData> {
 
   @override
   String toString() {
-    return (StringBuffer('TodoItemModelCompanion(')
+    return (StringBuffer('TodoModelCompanion(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('done: $done, ')
@@ -313,32 +311,32 @@ class TodoItemModelCompanion extends UpdateCompanion<TodoItemModelData> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $TodoItemModelTable todoItemModel = $TodoItemModelTable(this);
+  late final $TodoModelTable todoModel = $TodoModelTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [todoItemModel];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [todoModel];
 }
 
-typedef $$TodoItemModelTableCreateCompanionBuilder =
-    TodoItemModelCompanion Function({
+typedef $$TodoModelTableCreateCompanionBuilder =
+    TodoModelCompanion Function({
       Value<int> id,
       required String title,
       Value<bool> done,
       Value<DateTime?> createdAt,
     });
-typedef $$TodoItemModelTableUpdateCompanionBuilder =
-    TodoItemModelCompanion Function({
+typedef $$TodoModelTableUpdateCompanionBuilder =
+    TodoModelCompanion Function({
       Value<int> id,
       Value<String> title,
       Value<bool> done,
       Value<DateTime?> createdAt,
     });
 
-class $$TodoItemModelTableFilterComposer
-    extends Composer<_$AppDatabase, $TodoItemModelTable> {
-  $$TodoItemModelTableFilterComposer({
+class $$TodoModelTableFilterComposer
+    extends Composer<_$AppDatabase, $TodoModelTable> {
+  $$TodoModelTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -366,9 +364,9 @@ class $$TodoItemModelTableFilterComposer
   );
 }
 
-class $$TodoItemModelTableOrderingComposer
-    extends Composer<_$AppDatabase, $TodoItemModelTable> {
-  $$TodoItemModelTableOrderingComposer({
+class $$TodoModelTableOrderingComposer
+    extends Composer<_$AppDatabase, $TodoModelTable> {
+  $$TodoModelTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -396,9 +394,9 @@ class $$TodoItemModelTableOrderingComposer
   );
 }
 
-class $$TodoItemModelTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TodoItemModelTable> {
-  $$TodoItemModelTableAnnotationComposer({
+class $$TodoModelTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TodoModelTable> {
+  $$TodoModelTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -418,50 +416,39 @@ class $$TodoItemModelTableAnnotationComposer
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
-class $$TodoItemModelTableTableManager
+class $$TodoModelTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $TodoItemModelTable,
-          TodoItemModelData,
-          $$TodoItemModelTableFilterComposer,
-          $$TodoItemModelTableOrderingComposer,
-          $$TodoItemModelTableAnnotationComposer,
-          $$TodoItemModelTableCreateCompanionBuilder,
-          $$TodoItemModelTableUpdateCompanionBuilder,
-          (
-            TodoItemModelData,
-            BaseReferences<
-              _$AppDatabase,
-              $TodoItemModelTable,
-              TodoItemModelData
-            >,
-          ),
-          TodoItemModelData,
+          $TodoModelTable,
+          Todo,
+          $$TodoModelTableFilterComposer,
+          $$TodoModelTableOrderingComposer,
+          $$TodoModelTableAnnotationComposer,
+          $$TodoModelTableCreateCompanionBuilder,
+          $$TodoModelTableUpdateCompanionBuilder,
+          (Todo, BaseReferences<_$AppDatabase, $TodoModelTable, Todo>),
+          Todo,
           PrefetchHooks Function()
         > {
-  $$TodoItemModelTableTableManager(_$AppDatabase db, $TodoItemModelTable table)
+  $$TodoModelTableTableManager(_$AppDatabase db, $TodoModelTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () => $$TodoItemModelTableFilterComposer($db: db, $table: table),
+              () => $$TodoModelTableFilterComposer($db: db, $table: table),
           createOrderingComposer:
-              () =>
-                  $$TodoItemModelTableOrderingComposer($db: db, $table: table),
+              () => $$TodoModelTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer:
-              () => $$TodoItemModelTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+              () => $$TodoModelTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<bool> done = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
-              }) => TodoItemModelCompanion(
+              }) => TodoModelCompanion(
                 id: id,
                 title: title,
                 done: done,
@@ -473,7 +460,7 @@ class $$TodoItemModelTableTableManager
                 required String title,
                 Value<bool> done = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
-              }) => TodoItemModelCompanion.insert(
+              }) => TodoModelCompanion.insert(
                 id: id,
                 title: title,
                 done: done,
@@ -494,27 +481,24 @@ class $$TodoItemModelTableTableManager
       );
 }
 
-typedef $$TodoItemModelTableProcessedTableManager =
+typedef $$TodoModelTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $TodoItemModelTable,
-      TodoItemModelData,
-      $$TodoItemModelTableFilterComposer,
-      $$TodoItemModelTableOrderingComposer,
-      $$TodoItemModelTableAnnotationComposer,
-      $$TodoItemModelTableCreateCompanionBuilder,
-      $$TodoItemModelTableUpdateCompanionBuilder,
-      (
-        TodoItemModelData,
-        BaseReferences<_$AppDatabase, $TodoItemModelTable, TodoItemModelData>,
-      ),
-      TodoItemModelData,
+      $TodoModelTable,
+      Todo,
+      $$TodoModelTableFilterComposer,
+      $$TodoModelTableOrderingComposer,
+      $$TodoModelTableAnnotationComposer,
+      $$TodoModelTableCreateCompanionBuilder,
+      $$TodoModelTableUpdateCompanionBuilder,
+      (Todo, BaseReferences<_$AppDatabase, $TodoModelTable, Todo>),
+      Todo,
       PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$TodoItemModelTableTableManager get todoItemModel =>
-      $$TodoItemModelTableTableManager(_db, _db.todoItemModel);
+  $$TodoModelTableTableManager get todoModel =>
+      $$TodoModelTableTableManager(_db, _db.todoModel);
 }

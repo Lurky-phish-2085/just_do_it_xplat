@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_do_it_xplat/database/database.dart';
-import 'package:just_do_it_xplat/models/todo_model.dart';
-import 'package:just_do_it_xplat/repositories/todo_repository.dart';
+import 'package:just_do_it_xplat/database/models/todo_model.dart';
+import 'package:just_do_it_xplat/database/repositories/todo_repository.dart';
 import 'package:just_do_it_xplat/viewmodels/theme_viewmodel.dart';
 import 'package:just_do_it_xplat/viewmodels/todo_list_viewmodel.dart';
 import 'package:just_do_it_xplat/views/home_screen.dart';

@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_do_it_xplat/database/database.dart';
-import 'package:just_do_it_xplat/models/todo_model.dart';
 import 'package:just_do_it_xplat/viewmodels/theme_viewmodel.dart';
 import 'package:just_do_it_xplat/viewmodels/todo_list_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +31,7 @@ class HomeScreen extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Center(
-                child: StreamBuilder<Iterable<TodoItemModelData>>(
+                child: StreamBuilder<Iterable<Todo>>(
                   stream: appState.todos,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -74,7 +73,7 @@ class HomeScreen extends StatelessWidget {
           } else {
             return Padding(
               padding: const EdgeInsets.all(20.0),
-              child: StreamBuilder<Iterable<TodoItemModelData>>(
+              child: StreamBuilder<Iterable<Todo>>(
                 stream: appState.todos,
                 builder: (context, snapshot) {
                   final items = snapshot.data ?? [];
@@ -85,7 +84,6 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 20.0,
                           children: [
@@ -261,7 +259,7 @@ class _GreetingsState extends State<Greetings> {
 class StatsCard extends StatelessWidget {
   const StatsCard({super.key, required this.items});
 
-  final Iterable<TodoItemModelData> items;
+  final Iterable<Todo> items;
 
   @override
   Widget build(BuildContext context) {
@@ -322,9 +320,9 @@ class DoItList extends StatelessWidget {
     required this.onDelete,
   });
 
-  final Iterable<TodoItemModelData> items;
-  final void Function(TodoItemModelData)? onCheck;
-  final void Function(TodoItemModelData)? onDelete;
+  final Iterable<Todo> items;
+  final void Function(Todo)? onCheck;
+  final void Function(Todo)? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +373,7 @@ class Item extends StatelessWidget {
     required this.onDelete,
   });
 
-  final TodoItemModelData item;
+  final Todo item;
   final void Function()? onCheck;
   final void Function()? onDelete;
 
@@ -420,7 +418,7 @@ class AddItemForm extends StatefulWidget {
   });
 
   final AddItemFormVariants variant;
-  final void Function(TodoData item)? onSubmit;
+  final void Function(Todo item)? onSubmit;
 
   @override
   State<AddItemForm> createState() => _AddItemFormState();
@@ -458,7 +456,14 @@ class _AddItemFormState extends State<AddItemForm> {
             IconButton.filledTonal(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  widget.onSubmit?.call(TodoData(textFieldController.text));
+                  widget.onSubmit?.call(
+                    Todo(
+                      id: 0,
+                      title: textFieldController.text,
+                      done: false,
+                      createdAt: null,
+                    ),
+                  );
                   textFieldController.text = '';
                 }
               },
@@ -491,7 +496,14 @@ class _AddItemFormState extends State<AddItemForm> {
             ElevatedButton.icon(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  widget.onSubmit?.call(TodoData(textFieldController.text));
+                  widget.onSubmit?.call(
+                    Todo(
+                      id: 0,
+                      title: textFieldController.text,
+                      done: false,
+                      createdAt: null,
+                    ),
+                  );
                   textFieldController.text = '';
                 }
               },
